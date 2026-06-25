@@ -3,7 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class CampaignBlueprint extends Model
 {
@@ -21,6 +22,6 @@ class CampaignBlueprint extends Model
    }
    public function rawContents():HasMany
    {
-    return $this->HasMany(RawContents::class);
+    return $this->HasMany(RawContent::class);
    }
 }

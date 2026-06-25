@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -20,13 +21,13 @@ class User extends Authenticatable
 
   public function campaignBlueprints() :HasMany
   {
-   return $this->HasMany(CampaignBlueprints::class) ;
+   return $this->HasMany(CampaignBlueprint::class) ;
   }
 
 
   public function rawContents() :HasMany
   {
-    return $this->HasMany(RawContents::class);
+    return $this->HasMany(RawContent::class);
 
   }
     protected function casts(): array
