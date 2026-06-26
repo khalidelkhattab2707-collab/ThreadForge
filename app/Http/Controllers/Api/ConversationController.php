@@ -36,11 +36,10 @@ class ConversationController extends Controller
      *   "message": "Forbidden"
      * }
      */
-    public function store(
-        StoreChatMessageRequest $request,
-        int $postId
+    public function store(int $id,
+        StoreChatMessageRequest $request
     ): JsonResponse {
-        $post = GeneratedPost::with('rawContent')->findOrFail($postId);
+        $post = GeneratedPost::with('rawContent')->findOrFail($id);
 
         // Vérifie que le post appartient à l'utilisateur
         if ($post->rawContent->user_id !== $request->user()->id) {
