@@ -11,8 +11,39 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
+/**
+ * @group Posts Générés
+ *
+ * Gestion du cycle de vie des posts générés par l'IA.
+ */
+
 class GeneratedPostController extends Controller
 {
+
+    /**
+     * Liste des posts générés
+     *
+     * Retourne tous les posts générés appartenant à l'utilisateur authentifié.
+     *
+     * @response 200 {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "hook_propose": "Tu bloques tes users 30s pour un appel API ?",
+     *       "body_points": ["Les Jobs Laravel exécutent les tâches en background"],
+     *       "technical_readability_score": 85,
+     *       "suggested_hashtags": ["#Laravel", "#Backend"],
+     *       "tone_compliance_justification": "Ton direct et professionnel...",
+     *       "status": "draft",
+     *       "raw_content": {
+     *         "id": 1,
+     *         "status": "done"
+     *       },
+     *       "created_at": "2026-06-25 10:00:00"
+     *     }
+     *   ]
+     * }
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
         $posts = GeneratedPost::whereHas('rawContent', function ($query) use ($request) {
@@ -25,17 +56,56 @@ class GeneratedPostController extends Controller
         return GeneratedPostResource::collection($posts);
     }
 
+    /**
+     * Détail d'un post généré
+     *
+     * @response 200 {
+     *   "data": {
+     *     "id": 1,
+     *     "hook_propose": "Tu bloques tes users 30s pour un appel API ?",
+     *     "body_points": ["Les Jobs Laravel exécutent les tâches en background"],
+     *     "technical_readability_score": 85,
+     *     "suggested_hashtags": ["#Laravel", "#Backend"],
+     *     "tone_compliance_justification": "Ton direct et professionnel...",
+     *     "status": "draft",
+     *     "raw_content": {
+     *       "id": 1,
+     *       "status": "done"
+     *     },
+     *     "created_at": "2026-06-25 10:00:00"
+     *   }
+     * }
+     * @response 403 {
+     *   "message": "Forbidden"
+     * }
+     */
+
     public function show(int $id, Request $request): JsonResponse
     {
-        $post=GeneratedPost::findOrfail($id);
+        $post = GeneratedPost::with('rawContent')->findOrFail($id);
         $this->authorizeOwnership($request->user(), $post);
-      
-        
 
-         $post->load('rawContent');
-
-        return response()->json($post);
+        return response()->json(new GeneratedPostResource($post));
     }
+    /**
+     * Mettre à jour le statut
+     *
+     * Change le statut éditorial d'un post généré.
+     * Statuts disponibles : draft, posted, archived.
+     *
+     * @response 200 {
+     *   "data": {
+     *     "id": 1,
+     *     "status": "posted"
+     *   }
+     * }
+     * @response 422 {
+     *   "message": "The selected status is invalid.",
+     *   "errors": {
+     *     "status": ["The selected status is invalid."]
+     *   }
+     * }
+     */
 
     public function updateStatus(int $id, UpdatePostStatusRequest $request): JsonResponse {
          $post=GeneratedPost::findOrfail($id);

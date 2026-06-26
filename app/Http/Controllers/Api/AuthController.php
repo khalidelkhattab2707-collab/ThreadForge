@@ -13,6 +13,23 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+
+/**
+     * Inscription
+     *
+     * Crée un nouveau compte créateur et retourne un Bearer Token Sanctum.
+     *
+     * @unauthenticated
+     *
+     * @response 201 {
+     *   "user": {
+     *     "id": 1,
+     *     "name": "Khalid Dev",
+     *     "email": "khalid@threadforge.io"
+     *   },
+     *   "token": "1|abc123xyz..."
+     * }
+     */
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create([
@@ -28,6 +45,26 @@ class AuthController extends Controller
             'token' => $token,
         ], 201);
     }
+
+    /**
+     * Connexion
+     *
+     * Authentifie un créateur et retourne un Bearer Token Sanctum.
+     *
+     * @unauthenticated
+     *
+     * @response 200 {
+     *   "user": {
+     *     "id": 1,
+     *     "name": "Khalid Dev",
+     *     "email": "khalid@threadforge.io"
+     *   },
+     *   "token": "1|abc123xyz..."
+     * }
+     * @response 401 {
+     *   "message": "Invalid credentials"
+     * }
+     */
 
     public function login(LoginRequest $request): JsonResponse
     {
@@ -45,6 +82,15 @@ class AuthController extends Controller
             'token' => $token,
         ]);
     }
+     /**
+     * Déconnexion
+     *
+     * Révoque le Bearer Token courant.
+     *
+     * @response 200 {
+     *   "message": "Logged out successfully"
+     * }
+     */
 
     public function logout(Request $request): JsonResponse
     {
@@ -54,4 +100,5 @@ class AuthController extends Controller
             'message' => 'Logged out successfully',
         ]);
     }
+    
 }

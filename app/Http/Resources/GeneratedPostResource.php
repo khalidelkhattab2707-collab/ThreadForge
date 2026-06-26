@@ -22,10 +22,12 @@ class GeneratedPostResource extends JsonResource
             'suggested_hashtags'            => $this->suggested_hashtags,
             'tone_compliance_justification' => $this->tone_compliance_justification,
             'status'                        => $this->status->value,
-            'raw_content'                   => [
-                'id'     => $this->rawContent->id,
-                'status' => $this->rawContent->status->value,
-            ],
+            'raw_content'                   => $this->whenLoaded('rawContent', function () {
+                return [
+                    'id'     => $this->rawContent->id,
+                    'status' => $this->rawContent->status->value,
+                ];
+            }),
             'created_at' => $this->created_at->toDateTimeString(),
         
         ];
