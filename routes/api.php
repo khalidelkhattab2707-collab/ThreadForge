@@ -26,11 +26,11 @@ Route::delete('campaing-blueprint/{campaignBlueprint}',[CampaignBlueprintControl
 
 Route::post('raw-content/store',[RawContentController::class,'store']);
 
-Route::post('generated-post/store',[GeneratedPostController::class,'store']);
-Route::get('generated-post/',[GeneratedPostController::class,'index']);
-Route::get('/generated-post/{id}', [GeneratedPostController::class, 'show']);
-Route::put('generated-post/{generatedpost}',[GeneratedPostController::class,'update']);
-Route::delete('generated-post/{generatedpost}',[GeneratedPostController::class,'delete']);
+Route::post('generated-posts/store',[GeneratedPostController::class,'store']);
+Route::get('generated-posts/',[GeneratedPostController::class,'index']);
+Route::get('/generated-posts/{id}', [GeneratedPostController::class, 'show']);
+Route::put('generated-posts/{generatedpost}',[GeneratedPostController::class,'update']);
+Route::delete('generated-posts/{generatedpost}',[GeneratedPostController::class,'delete']);
  });
 
 

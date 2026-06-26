@@ -1,0 +1,282 @@
+name: 'Campaign Blueprints'
+description: |-
+
+  Gestion des configurations de style réutilisables pour la génération de posts.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/campaing-blueprint/store
+    metadata:
+      custom: []
+      groupName: 'Campaign Blueprints'
+      groupDescription: |-
+
+        Gestion des configurations de style réutilisables pour la génération de posts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Créer un Blueprint'
+      description: 'Crée une nouvelle configuration de style pour les futures générations.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {BEARER_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      target_audience:
+        custom: []
+        name: target_audience
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      tone:
+        custom: []
+        name: tone
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: g
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      max_length:
+        custom: []
+        name: max_length
+        description: 'Must be at least 50. Must not be greater than 280.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      max_hashtags:
+        custom: []
+        name: max_hashtags
+        description: 'Must be at least 0. Must not be greater than 5.'
+        required: false
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      forbidden_words:
+        custom: []
+        name: forbidden_words
+        description: 'Must not be greater than 50 characters.'
+        required: false
+        example:
+          - i
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: b
+      target_audience: 'n'
+      tone: g
+      max_length: 16
+      max_hashtags: 2
+      forbidden_words:
+        - i
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 201
+        content: |-
+          {
+            "data": {
+              "id": 1,
+              "name": "Tech Twitter FR",
+              "target_audience": "Développeurs Laravel francophones",
+              "tone": "Professionnel mais décontracté",
+              "max_length": 280,
+              "max_hashtags": 2,
+              "forbidden_words": ["facile", "simple"],
+              "created_at": "2026-06-25 10:00:00"
+            }
+          }
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "message": "The name field is required.",
+            "errors": {
+              "name": ["The name field is required."]
+            }
+          }
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 2|IgtoZuuObkgFJhBmBp2tRNMQ44kN30bebB4IFOtT247f64fe'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/campaing-blueprint
+    metadata:
+      custom: []
+      groupName: 'Campaign Blueprints'
+      groupDescription: |-
+
+        Gestion des configurations de style réutilisables pour la génération de posts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Liste des Blueprints'
+      description: |-
+        Retourne tous les Blueprints de l'utilisateur authentifié
+        avec le nombre de contenus bruts associés.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {BEARER_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "data": [
+              {
+                "id": 1,
+                "name": "Tech Twitter FR",
+                "target_audience": "Développeurs Laravel francophones",
+                "tone": "Professionnel mais décontracté",
+                "max_length": 280,
+                "max_hashtags": 2,
+                "forbidden_words": ["facile", "simple"],
+                "raw_contents_count": 3,
+                "created_at": "2026-06-25 10:00:00"
+              }
+            ]
+          }
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 2|IgtoZuuObkgFJhBmBp2tRNMQ44kN30bebB4IFOtT247f64fe'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/campaing-blueprint/{campaignBlueprint}'
+    metadata:
+      custom: []
+      groupName: 'Campaign Blueprints'
+      groupDescription: |-
+
+        Gestion des configurations de style réutilisables pour la génération de posts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Détail d'un Blueprint"
+      description: "Retourne les détails d'un Blueprint spécifique appartenant à l'utilisateur."
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {BEARER_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      campaignBlueprint:
+        custom: []
+        name: campaignBlueprint
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      campaignBlueprint: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "data": {
+              "id": 1,
+              "name": "Tech Twitter FR",
+              "target_audience": "Développeurs Laravel francophones",
+              "tone": "Professionnel mais décontracté",
+              "max_length": 280,
+              "max_hashtags": 2,
+              "forbidden_words": ["facile", "simple"],
+              "created_at": "2026-06-25 10:00:00"
+            }
+          }
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 403
+        content: |-
+          {
+            "message": "Forbidden"
+          }
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 2|IgtoZuuObkgFJhBmBp2tRNMQ44kN30bebB4IFOtT247f64fe'
+    controller: null
+    method: null
+    route: null
