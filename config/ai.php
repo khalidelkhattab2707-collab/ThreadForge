@@ -38,6 +38,11 @@ return [
         ],
     ],
 
+    'conversations' => [
+    'store'          => 'database',
+    'generate_title' => true,
+],
+
     /*
     |--------------------------------------------------------------------------
     | AI Providers

@@ -16,6 +16,7 @@ class GeneratedPost extends Model
         'suggested_hashtags',
         'tone_compliance_justification',
         'status',
+        'ai_conversation_id',
     ];
 
     protected $casts = [
