@@ -37,10 +37,8 @@ class GeneratedPostController extends Controller
         return response()->json($post);
     }
 
-    public function updateStatus(
-        UpdatePostStatusRequest $request,
-        GeneratedPost $post
-    ): JsonResponse {
+    public function updateStatus(int $id, UpdatePostStatusRequest $request): JsonResponse {
+         $post=GeneratedPost::findOrfail($id);
         $post->load('rawContent');
 
         $this->authorizeOwnership($request->user(), $post);
