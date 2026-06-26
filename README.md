@@ -1,58 +1,232 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ThreadForge API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API Laravel de transformation de contenu brut en posts Twitter/X optimisés par IA, avec assistant conversationnel Ghostwriter.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Technologie | Version |
+|---|---|
+| Laravel | 13 |
+| PHP | ^8.3 |
+| MySQL | |
+| laravel/ai | ^0.8.1 |
+| Sanctum | ^4.0 |
+| Queue | database |
+| API Docs | Scribe |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Prérequis
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP ^8.3
+- Composer
+- MySQL
+- Node.js & npm
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Installation
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+cp .env.example .env
+# Configurer DB et GROQ_API_KEY dans .env
+php artisan key:generate
+php artisan migrate
+php artisan scribe:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Développement
 
-## Contributing
+```bash
+composer run dev
+# Lance simultanément : serveur + queue:listen + logs + Vite
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Tests
 
-## Code of Conduct
+```bash
+composer run test
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Architecture
 
-## Security Vulnerabilities
+### Flux Repurposing
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```
+CampaignBlueprint (règles de style)
+        │
+        ▼
+RawContent (contenu brut soumis via API)
+        │
+        ▼
+ProcessRawContentJob (queue asynchrone)
+        │
+        ▼
+GrokRepurposingService (appel Groq)
+        │
+        ▼
+GeneratedPost (post structuré généré)
+```
 
-## License
+### Ghostwriter Agent
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Agent conversationnel avec mémoire (`RemembersConversations`) et 2 outils PHP réels :
+
+| Outil | Rôle |
+|---|---|
+| `getCampaignRules` | Lit les règles de style du Blueprint associé au post |
+| `getPostHistory` | Lit les versions précédentes du post |
+
+L'agent répond en français, utilise les outils pour éviter les hallucinations, et maintient le contexte via `laravel/ai`.
+
+## MCD — Relations entre entités
+
+| Entité #1 | Cardinalité | Entité #2 | Cardinalité | Signification |
+|---|---|---|---|---|
+| **User** | 1──N | CampaignBlueprint | 1──N | Un utilisateur possède N blueprints |
+| **User** | 1──N | RawContent | 1──N | Un utilisateur soumet N contenus bruts |
+| **CampaignBlueprint** | 1──N | RawContent | 1──N | Un blueprint définit N contenus bruts |
+| **RawContent** | 1──1 | GeneratedPost | 1──1 | Un contenu brut génère un post |
+| **GeneratedPost** | 0..1──1 | AgentConversation | 0..1──1 | Un post peut référencer une conversation |
+| **User** | 1──N | AgentConversation | 1──N | Un utilisateur a N conversations |
+| **AgentConversation** | 1──N | AgentConversationMessage | 1──N | Une conversation contient N messages |
+
+## MLD — Tables
+
+### `users`
+
+| Colonne | Type | Contraintes |
+|---|---|---|
+| id | INT | PK |
+| name | VARCHAR(255) | NOT NULL |
+| email | VARCHAR(255) | UNIQUE, NOT NULL |
+| email_verified_at | TIMESTAMP | NULL |
+| password | VARCHAR(255) | NOT NULL |
+| remember_token | VARCHAR(100) | NULL |
+| created_at | TIMESTAMP | |
+| updated_at | TIMESTAMP | |
+
+### `campaign_blueprints`
+
+| Colonne | Type | Contraintes |
+|---|---|---|
+| id | INT | PK |
+| **user_id** | INT | FK → users.id |
+| name | VARCHAR(255) | |
+| target_audience | VARCHAR(255) | |
+| tone | VARCHAR(255) | |
+| max_length | INT UNSIGNED | DEFAULT 280 |
+| forbidden_words | JSON | NULL |
+| max_hashtags | TINYINT UNSIGNED | DEFAULT 1 |
+| created_at | TIMESTAMP | |
+| updated_at | TIMESTAMP | |
+
+### `raw_contents`
+
+| Colonne | Type | Contraintes |
+|---|---|---|
+| id | INT | PK |
+| **user_id** | INT | FK → users.id ON DELETE CASCADE |
+| **campaign_blueprint_id** | INT | FK → campaign_blueprints.id ON DELETE CASCADE |
+| content | TEXT | |
+| status | VARCHAR(255) | DEFAULT 'pending' |
+| created_at | TIMESTAMP | |
+| updated_at | TIMESTAMP | |
+
+### `generated_posts`
+
+| Colonne | Type | Contraintes |
+|---|---|---|
+| id | INT | PK |
+| **raw_content_id** | INT | FK → raw_contents.id ON DELETE CASCADE |
+| hook_propose | VARCHAR(280) | NULL |
+| body_points | JSON | NULL |
+| technical_readability_score | TINYINT UNSIGNED | NULL |
+| suggested_hashtags | JSON | NULL |
+| tone_compliance_justification | TEXT | NULL |
+| status | VARCHAR(255) | DEFAULT 'draft' |
+| **ai_conversation_id** | VARCHAR(36) | NULL, FK → agent_conversations.id |
+| created_at | TIMESTAMP | |
+| updated_at | TIMESTAMP | |
+
+### `agent_conversations`
+
+| Colonne | Type | Contraintes |
+|---|---|---|
+| id | VARCHAR(36) | PK |
+| **user_id** | INT | NULL, FK → users.id |
+| title | VARCHAR(255) | |
+| created_at | TIMESTAMP | |
+| updated_at | TIMESTAMP | |
+
+### `agent_conversation_messages`
+
+| Colonne | Type | Contraintes |
+|---|---|---|
+| id | VARCHAR(36) | PK |
+| **conversation_id** | VARCHAR(36) | FK → agent_conversations.id |
+| **user_id** | INT | NULL, FK → users.id |
+| agent | VARCHAR(255) | |
+| role | VARCHAR(25) | |
+| content | TEXT | |
+| attachments | TEXT | |
+| tool_calls | TEXT | |
+| tool_results | TEXT | |
+| usage | TEXT | |
+| meta | TEXT | |
+| created_at | TIMESTAMP | |
+| updated_at | TIMESTAMP | |
+
+## API Endpoints
+
+### Auth
+
+| Méthode | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/api/register` | ✗ | Inscription |
+| POST | `/api/login` | ✗ | Connexion |
+| POST | `/api/logout` | ✓ | Déconnexion |
+| GET | `/api/user` | ✓ | Profil utilisateur |
+
+### Campaign Blueprints
+
+| Méthode | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/api/campaing-blueprint` | ✓ | Lister mes blueprints |
+| GET | `/api/campaing-blueprint/{id}` | ✓ | Détail d'un blueprint |
+| POST | `/api/campaing-blueprint/store` | ✓ | Créer un blueprint |
+| PUT | `/api/campaing-blueprint/{id}` | ✓ | Modifier un blueprint |
+| DELETE | `/api/campaing-blueprint/{id}` | ✓ | Supprimer un blueprint |
+
+### Raw Content
+
+| Méthode | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/api/raw-content/store` | ✓ | Soumettre contenu brut (déclenche job) |
+
+### Generated Posts
+
+| Méthode | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/api/generated-post` | ✓ | Lister mes posts générés |
+| GET | `/api/generated-post/{id}` | ✓ | Détail d'un post |
+| PUT | `/api/generated-post/{id}` | ✓ | Mettre à jour le statut |
+| DELETE | `/api/generated-post/{id}` | ✓ | Supprimer un post |
+
+### Ghostwriter Agent
+
+| Méthode | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/api/generated-post/{postId}/chat` | ✓ | Envoyer un message à l'agent |
+
+## Statuts
+
+### RawContent
+
+```
+pending → analyzing → done
+                   → failed
+```
+
+### GeneratedPost
+
+```
+draft → posted → archived
+```
