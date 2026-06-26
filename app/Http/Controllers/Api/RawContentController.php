@@ -12,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 
 class RawContentController extends Controller
 {
-    public function store(StoreRawContentRequest $request): JsonResponse
+    public function store(StoreRawContentRequest $request)
     {
         $blueprint = CampaignBlueprint::findOrFail(
             $request->validated('campaign_blueprint_id')

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CampaignBlueprintController;
 use App\Http\Controllers\Api\RawContentController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\GeneratedPostController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -27,7 +28,7 @@ Route::post('raw-content/store',[RawContentController::class,'store']);
 
 Route::post('generated-post/store',[GeneratedPostController::class,'store']);
 Route::get('generated-post/',[GeneratedPostController::class,'index']);
-Route::get('generated-post/{generatedpost}',[GeneratedPostController::class,'show']);
+Route::get('/generated-post/{id}', [GeneratedPostController::class, 'show']);
 Route::put('generated-post/{generatedpost}',[GeneratedPostController::class,'update']);
 Route::delete('generated-post/{generatedpost}',[GeneratedPostController::class,'delete']);
  });

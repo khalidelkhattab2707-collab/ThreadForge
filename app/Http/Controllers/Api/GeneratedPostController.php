@@ -25,13 +25,16 @@ class GeneratedPostController extends Controller
         return GeneratedPostResource::collection($posts);
     }
 
-    public function show(Request $request, GeneratedPost $post): JsonResponse
+    public function show(int $id, Request $request): JsonResponse
     {
-        $post->load('rawContent');
-
+        $post=GeneratedPost::findOrfail($id);
         $this->authorizeOwnership($request->user(), $post);
+      
+        
 
-        return response()->json(new GeneratedPostResource($post));
+         $post->load('rawContent');
+
+        return response()->json($post);
     }
 
     public function updateStatus(
